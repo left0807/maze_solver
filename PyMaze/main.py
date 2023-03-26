@@ -4,20 +4,22 @@ import os
 import time
 from turtle import Turtle
 
-height = 50
-width = 50
+height = 15
+width = 15
 maze = [['#' for y in range(height)] for x in range(width)]
+visible = [[' ' for y in range(height)] for x in range(width)]
 
 def print_maze():
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(*[" ".join(row) for row in maze], sep="\n")
+    print(*[" ".join(row) for row in visible], sep="\n")
+    time.sleep(0.05)
 
 
 def dfs_build():
     stack = [(1, 0)]
     
     while stack:
-        print_maze();
+        #print_maze();
 
         x, y = stack[-1]
         maze[x][y] = ' '  # Mark current cell as empty
@@ -68,7 +70,7 @@ def kruskal_build():
             sets.remove(set2)
             mx, my = (x1+x2)//2, (y1+y2)//2
             maze[mx][my] = ' '
-            print_maze()
+            #print_maze()
         
 def dfs_solve(start, end):
     stack = [start]
@@ -77,20 +79,20 @@ def dfs_solve(start, end):
         pos = stack.pop()
 
         maze[pos[0]][pos[1]] = '@'
+        visible[pos[0]][pos[1]] = '@'
         print_maze()
-
-        if pos == end:
-            return True
 
         found = False
 
         for move in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             new_pos = (pos[0] + move[0], pos[1] + move[1])
+            if 0 <= new_pos[0] < width and 0 <= new_pos[1] < height: visible[new_pos[0]][new_pos[1]] = maze[new_pos[0]][new_pos[1]]
             if 0 <= new_pos[0] < width and 0 <= new_pos[1] < height and maze[new_pos[0]][new_pos[1]] == ' ':
                 stack.append((new_pos))
                 found = True;
         
         maze[pos[0]][pos[1]] = '.'
+        visible[pos[0]][pos[1]] = '.'
         
             
 
@@ -102,7 +104,7 @@ def bfs_solve(start, end):
 
     while queue:
         pos, path = queue.popleft()
-        maze[pos[0]][pos[1]] = '.'
+        visible[pos[0]][pos[1]] = '+'
         print_maze()
         if pos == end:
             return path + [pos]
@@ -111,7 +113,7 @@ def bfs_solve(start, end):
         visited.add(pos)
         for move in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             new_pos = (pos[0] + move[0], pos[1] + move[1])
-            if 0 <= new_pos[0] < width and 0 <= new_pos[1] < height and maze[new_pos[0]][new_pos[1]] != '#' and new_pos not in visited:
+            if 0 <= new_pos[0] < width and 0 <= new_pos[1] < height and visible[new_pos[0]][new_pos[1]] != '#' and new_pos not in visited:
                 queue.append((new_pos, path + [pos]))
     return None
 
@@ -121,4 +123,7 @@ if __name__ == "__main__":
     dfs_build();
     end = (height-2, width-1)
     dfs_solve((0, 0), end)
+    for pos in bfs_solve((0, 0), end):
+        visible[pos[0]][pos[1]] = 'a'
+        print_maze()
     
